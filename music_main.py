@@ -14,10 +14,10 @@ MIN = 21
 MAX = 100
 final_matrix = []
 sample_matrix = []
-sampling_rate = 16000
-input_slice = 600000
+sampling_rate = 22050
+input_slice = 660000
 dimensions = 4000
-epochs = 100
+epochs = 10
 bsize = 32
 
 
