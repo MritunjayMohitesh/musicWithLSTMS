@@ -6,6 +6,7 @@ Created on Fri Jan 19 10:31:44 2018
 """
 import numpy as np,pandas as pd
 import importlib
+import matplotlib.pyplot as plt
 from pydub import AudioSegment
 importlib.import_module('music_main')
 import librosa
@@ -30,10 +31,8 @@ sample_matrix = np.array(final_matrix)
 nb_samples = sample_matrix.shape[0]*sample_matrix.shape[1]
 features = sample_matrix.shape[2]
 sample_matrix = sample_matrix.reshape((nb_samples,features))
-sample_matrix.dump('new_array_22050_scipy')
-max_val = np.max(np.abs(sample_matrix))
-sample_matrix = sample_matrix/max_val
-#sample_matrix = np.load('new_array_20000')
+#sample_matrix.dump('new_array_22050_scipy')
+sample_matrix = np.load('new_array_22050_scipy')
 
 from keras.models import Sequential
 from keras.layers import Dense,TimeDistributed
@@ -64,7 +63,7 @@ reg.compile(optimizer = 'rmsprop', loss = 'mean_squared_error')
 
 
 reg.fit(X_train, Y_train, epochs = 10, batch_size = bsize)
-reg.save_weights('music_generation_22050')
+reg.save_weights('music_generation_22050_scipy')
 #reg.load_weights('')
 
 
@@ -91,7 +90,7 @@ def to_time_domain(preds):
     pred_imag = pred_imag.reshape((pred_imag.shape[0]*pred_imag.shape[1]))
     pred_complex = pred_real + 1j*pred_imag
     pred_ifft = sf.ifft(pred_complex)
-    pred_int = np.abs(pred_ifft)
+    pred_int = pred_ifft.imag
     return pred_int
     
 
@@ -120,6 +119,15 @@ pred_output_denorm = sc.inverse_transform(predicted_output)
 pred_x = to_time_domain(pred_output_denorm)
 
 
-wavfile.write(PATH_T+'pred8.wav',16000,pred_x)
-librosa.output.write_wav(PATH_T+'pred9.wav',pred_x,22050)
-Audio(PATH_T+'pred7'+'.wav')
+wavfile.write(PATH_T+'pred8.wav',22050,pred_x)
+#librosa.output.write_wav(PATH_T+'pred9.wav',pred_x,22050)
+Audio(PATH_T+'pred7'+'.wav',autoplay = True)
+
+
+
+bt , pred_X = wavfile.read(PATH_T+'pred8.wav')
+
+plt.plot(sr_file)
+plt.show()
+plt.plot(pred_X)
+plt.show()
