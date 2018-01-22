@@ -62,8 +62,8 @@ reg.add(TimeDistributed(Dense(units = features)))
 reg.compile(optimizer = 'rmsprop', loss = 'mean_squared_error')
 
 
-reg.fit(X_train, Y_train, epochs = 10, batch_size = bsize)
-reg.save_weights('music_generation_22050_scipy')
+reg.fit(X_train, Y_train, epochs = epochs, batch_size = bsize)
+reg.load_weights('music_generation_22050_scipy')
 #reg.load_weights('')
 
 
@@ -90,7 +90,8 @@ def to_time_domain(preds):
     pred_imag = pred_imag.reshape((pred_imag.shape[0]*pred_imag.shape[1]))
     pred_complex = pred_real + 1j*pred_imag
     pred_ifft = sf.ifft(pred_complex)
-    pred_int = pred_ifft.imag
+    pred_int = pred_ifft.astype('float32')
+    pred_int = np.array(pred_int)
     return pred_int
     
 
@@ -117,10 +118,10 @@ for it in range(TIMESTEPS):
 predicted_output = np.array(output)
 pred_output_denorm = sc.inverse_transform(predicted_output)
 pred_x = to_time_domain(pred_output_denorm)
-
-
-wavfile.write(PATH_T+'pred8.wav',22050,pred_x)
-#librosa.output.write_wav(PATH_T+'pred9.wav',pred_x,22050)
+pred_x_librosa = to_time_domain(predicted_output)
+pred_x_librosa = pred_x_librosa*60
+wavfile.write(PATH_T+'pred8.wav',22050,np.array(va))
+librosa.output.write_wav(PATH_T+'pred9.wav',pred_x_librosa,22050)
 Audio(PATH_T+'pred7'+'.wav',autoplay = True)
 
 
@@ -128,6 +129,8 @@ Audio(PATH_T+'pred7'+'.wav',autoplay = True)
 bt , pred_X = wavfile.read(PATH_T+'pred8.wav')
 
 plt.plot(sr_file)
-plt.show()
-plt.plot(pred_X)
-plt.show()
+plt.plot(pred_x_librosa)
+
+wavfile.write(PATH_T+'pred9.wav',22050,var[1])
+
+va = [x for x in pred_x_librosa if x>=0.001 or x<=-0.001]
